@@ -10,6 +10,8 @@
 ## Installation
 Per l'installazione della libreria pygmae si procede con il comando da terminale per: `pip install pygame` oppure eseguendo il file [setup.bat](\etc\setup.bat).
 
+***SI CONSIGLIA DI ESEGUIRE IL PROGRAMMA PRIMA DELL'USO*** per creare i file e le cartelle necessarie
+
 ## Program
 Il programma apre in input il file [playlist.csv](\bin\playlist.csv) ed esegue il comando delle tracce audio a seconda del parametro impostato
 
@@ -68,4 +70,4 @@ Se si riscontrano problemi con la libreria pygmae probabilmente bisogna aggiorna
 
 ## Author
 Vicentini Tommaso
-"# enter_player" 
+
