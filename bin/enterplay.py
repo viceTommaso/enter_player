@@ -2,7 +2,7 @@
 # !/usr/bin/env python3
 
 __author__ = "Vicentini Tommaso"
-__version__ = "01.01"
+__version__ = "02.01"
 
 import csv
 import os
@@ -173,7 +173,8 @@ def main():
         songlist_print.append(f"""{color}{command[i]} {song[i]}{bcolors.ENDC}""")
 
     mixer.init()
-    for i in range(0, len(command)):
+    i = 0
+    while i < len(command):
         next_tracks = ""
         fadeout = "0"
         for f in range(i+1, len(songlist_print)):
@@ -183,7 +184,7 @@ def main():
         if next_tracks != "":
             answer = input(f"""\n{color}{command[i]} {song[i]}{bcolors.ENDC}\n\n\nnext tracks:\n{next_tracks}""")
         else:
-            answer = input(f"""\n{color}{command[i]} {song[i]}{bcolors.ENDC}""")
+            answer = input(f"""\n{color}{command[i]} {song[i]}{bcolors.ENDC}\n""")
         if answer == "":
             if command[i] == "PLAY":
                 mixer.music.load(path_songs + str(song[i]))
@@ -196,6 +197,14 @@ def main():
                 if command[i] == "FOUT" and lvl_audiorfade != [] and lvl_audiorfade[i] != "":
                     fadeout = lvl_audiorfade[i]
                 player(command[i], fadeout)
+        else:
+            try:
+                if int(answer) <= len(command):
+                    i = int(answer) - 2
+            except:
+                pass
+        i += 1
+
                 
     return None
 
