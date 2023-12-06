@@ -2,7 +2,7 @@
 # !/usr/bin/env python3
 
 __author__ = "Vicentini Tommaso"
-__version__ = "02.01"
+__version__ = "02.02"
 
 import csv
 import os
@@ -162,10 +162,14 @@ def main():
 
     with open(in_songfile, "r", encoding="utf-8") as in_song:
         for i in list(csv.reader(in_song)):
-            command.append(i[0])
-            song.append(i[-1])
-            if len(i) == 3:
-                lvl_audiorfade.append(lvltracks(i[0], i[1]))
+            try:
+                command.append(i[0])
+                song.append(i[-1])
+                if len(i) == 3:
+                    lvl_audiorfade.append(lvltracks(i[0], i[1]))
+            except IndexError:
+                pass
+    
         in_song.close()
 
     for i in range(0, len(command)):
@@ -205,7 +209,6 @@ def main():
                 pass
         i += 1
 
-                
     return None
 
 

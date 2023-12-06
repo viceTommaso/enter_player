@@ -69,8 +69,17 @@ Se non vengono impostati valori di default e 10
 #### Fade-out
 Il secondo argomento per FOUT funge da fade-out in millisecondi
 
-## Problems
+## Problems/Bugs
 Se si riscontrano problemi con la libreria pygmae probabilmente bisogna aggiornarla con il comando: `pip install --upgrade pygame` oppure eseguendo il file [setup.bat](\etc\setup.bat).
+
+Se si naviga nella playlist è bene non posizionarsi su tracce al di fuori del "PLAY" per non esegure altri comandi su tracce indesiderate
+
+Il file input essendo .csv non è variabile in argomenti, dunque non variare il numero di `,` per riga
+
+Usare soltando `,` per separare gli argomenti nel flie di input
+
+Per escludere potenziali bugs, non lasciare linee vuote nel file di input
+
 
 ## Author
 Vicentini Tommaso
