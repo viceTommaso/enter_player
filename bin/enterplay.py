@@ -2,9 +2,10 @@
 # !/usr/bin/env python3
 
 __author__ = "Vicentini Tommaso"
-__version__ = "02.02"
+__version__ = "03.01"
 
 import csv
+import keyboard
 import os
 import platform
 from pygame import mixer
@@ -12,6 +13,14 @@ from pygame import mixer
 
 in_songfile = ".\\playlist.csv"
 path_songs = ".\\tracks\\"
+line_limit = 0
+line_margin = 0
+
+if line_limit//2 <= line_margin:
+    if line_limit % 2 == 0:
+        line_margin = (line_limit//2) - 1 
+    else:
+        line_margin = (line_limit//2) 
 
 
 class bcolors:
@@ -56,6 +65,44 @@ def init_directory(dir_ck, dir_vsby, dir_name):
             msg = msg + " and hidden"
         print(msg)
     return 0
+
+
+def os_ril():
+    """
+    legge il sistema operativo e ritona la stringa del comando "clear" del sistema operativo usato
+    :return: cls_opsys
+    """
+    try:
+        if platform.system() == "Windows":
+            cls_opsys = "cls"
+        elif platform.system() == "Darwin":
+            cls_opsys = "clear"
+        elif platform.system() == "Linux":
+            cls_opsys = "clear"
+    except:
+        cls_opsys = ""
+    return cls_opsys
+
+
+def read_in(t_in_songfile):
+    """
+    legge il file di input ritonando i vetori del comando, livello_audio, suono
+    :return: [t_command, t_lvl_audiorfade, t_song]
+    """
+    t_command = []
+    t_lvl_audiorfade = []
+    t_song = []
+    with open(t_in_songfile, "r", encoding="utf-8") as in_song:
+        for i in list(csv.reader(in_song)):
+            try:
+                t_command.append(i[0])
+                t_song.append(i[-1])
+                if len(i) == 3:
+                    t_lvl_audiorfade.append(lvltracks(i[0], i[1]))
+            except IndexError:
+                pass
+        in_song.close()
+    return [t_command, t_lvl_audiorfade, t_song]
 
 
 def lvltracks(t_cmd, t_str_lvl):
@@ -136,60 +183,69 @@ def player(t_cmd, t_str_fadeout):
     return 0
 
 
+def grafic(t_line_limit, t_line_margin, t_songlist_print, t_cls_opsys, t_print_pos, t_underline_pos, moveorback):
+    """
+    interfaccia grafica del programma
+    :t_line_limit: INT righe da visualizzare a video
+    :t_line_margin: INT numero di tracce che si vogliono visualizzare prima e dopo della traccia che verrà riprodotta
+    :t_songlist_print: VETTORE lista delle canzoni
+    :t_cls_opsys: STR stringa del comando per cancellare i precedennti print
+    :t_print_pos: INT conteggio posizione da cui stampare a video
+    :t_underline_pos: INT conteggio posizione linea sottolineata
+    :moveorback: STR "+1", "-1" per sapere se manda avanti o indietro nella grafica
+    :return: [t_print_pos, t_underline_pos]
+    """
+    if t_line_limit == 0:
+        t_line_limit = len(t_songlist_print)
+    if moveorback == "+1":
+        if t_underline_pos != t_line_limit - (1 + t_line_margin):
+            t_underline_pos += 1
+        else:
+            t_print_pos +=1
+    if moveorback == "-1":
+        if t_underline_pos != 0 + t_line_margin:
+            t_underline_pos -= 1
+        else:
+            t_print_pos -= 1
+    os.system(t_cls_opsys)
+    for f in range(0, t_line_limit):
+        try:
+            if t_underline_pos == f:
+                print(str(bcolors.UNDERLINE + t_songlist_print[f + t_print_pos]))
+            else:
+                print(str(t_songlist_print[f + t_print_pos]))
+        except IndexError:
+                pass
+    return [t_print_pos, t_underline_pos]
+
+
 def main():
     """
     main
     :return: None
     """
-    command = []
-    lvl_audiorfade = []
-    song = []
-    songlist_print = []
-    cls_opsys = ""
-
     init_files(in_songfile, "INPUT")
     init_directory(path_songs, "", "TRACKS")
 
-    try:
-        if platform.system() == "Windows":
-            cls_opsys = "cls"
-        elif platform.system() == "Darwin":
-            cls_opsys = "clear"
-        elif platform.system() == "Linux":
-            cls_opsys = "clear"
-    except:
-        pass
+    cls_opsys = os_ril()
 
-    with open(in_songfile, "r", encoding="utf-8") as in_song:
-        for i in list(csv.reader(in_song)):
-            try:
-                command.append(i[0])
-                song.append(i[-1])
-                if len(i) == 3:
-                    lvl_audiorfade.append(lvltracks(i[0], i[1]))
-            except IndexError:
-                pass
-    
-        in_song.close()
+    read_fin = read_in(in_songfile)
+    command = read_fin[0]
+    lvl_audiorfade = read_fin[1]
+    song = read_fin[2]
 
+    songlist_print = []
     for i in range(0, len(command)):
         color = writecolor(command[i])
         songlist_print.append(f"""{color}{command[i]} {song[i]}{bcolors.ENDC}""")
-
+    
     mixer.init()
     i = 0
+    grafica = grafic(line_limit, line_margin, songlist_print, cls_opsys, 0, 0, "")
     while i < len(command):
-        next_tracks = ""
         fadeout = "0"
-        for f in range(i+1, len(songlist_print)):
-            next_tracks += str(songlist_print[f]) + "\n"
-        color = writecolor(command[i])
-        os.system(cls_opsys)
-        if next_tracks != "":
-            answer = input(f"""\n{color}{command[i]} {song[i]}{bcolors.ENDC}\n\n\nnext tracks:\n{next_tracks}""")
-        else:
-            answer = input(f"""\n{color}{command[i]} {song[i]}{bcolors.ENDC}\n""")
-        if answer == "":
+        event = keyboard.read_event()
+        if event.event_type == keyboard.KEY_DOWN and event.name == "space":
             if command[i] == "PLAY":
                 mixer.music.load(path_songs + str(song[i]))
                 if lvl_audiorfade != []:
@@ -201,14 +257,20 @@ def main():
                 if command[i] == "FOUT" and lvl_audiorfade != [] and lvl_audiorfade[i] != "":
                     fadeout = lvl_audiorfade[i]
                 player(command[i], fadeout)
-        else:
-            try:
-                if int(answer) <= len(command):
-                    i = int(answer) - 2
-            except:
-                pass
-        i += 1
 
+            if i != len(command)-1:
+                grafica = grafic(line_limit, line_margin, songlist_print, cls_opsys, grafica[0], grafica[1], "+1")
+                i += 1
+
+        elif event.event_type == keyboard.KEY_DOWN and event.name == "freccia giù" or event.event_type == keyboard.KEY_DOWN and event.name == "freccia destra":
+            if i != len(command)-1:
+                grafica = grafic(line_limit, line_margin, songlist_print, cls_opsys, grafica[0], grafica[1], "+1")
+                i += 1
+
+        elif event.event_type == keyboard.KEY_DOWN and event.name == "freccia su" or event.event_type == keyboard.KEY_DOWN and event.name == "freccia sinistra":
+            if i != 0:
+                grafica = grafic(line_limit, line_margin, songlist_print, cls_opsys, grafica[0], grafica[1], "-1")
+                i -= 1
     return None
 
 
