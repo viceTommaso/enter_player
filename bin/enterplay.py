@@ -2,7 +2,7 @@
 # !/usr/bin/env python3
 
 __author__ = "Vicentini Tommaso"
-__version__ = "03.01"
+__version__ = "04.01"
 
 import csv
 import keyboard
@@ -92,17 +92,36 @@ def read_in(t_in_songfile):
     t_command = []
     t_lvl_audiorfade = []
     t_song = []
+    t_channel = []
+    t_n_channels = 1
+    
     with open(t_in_songfile, "r", encoding="utf-8") as in_song:
         for i in list(csv.reader(in_song)):
             try:
                 t_command.append(i[0])
                 t_song.append(i[-1])
-                if len(i) == 3:
+                if len(i) >= 3:
                     t_lvl_audiorfade.append(lvltracks(i[0], i[1]))
+                if len(i) == 4:
+                    t_channel.append(i[2])
             except IndexError:
                 pass
         in_song.close()
-    return [t_command, t_lvl_audiorfade, t_song]
+
+        if t_channel == []:
+            for i in t_command:
+                t_channel.append("0")
+        else:
+            for i in range(0, len(t_channel)):
+                if t_channel[i] == "":
+                    t_channel[i] = "0"
+        for i in range(0, len(t_channel)):
+            if int(t_channel[i]) > t_n_channels:
+                t_n_channels = int(t_channel[i])
+        t_n_channels += 1
+        if t_n_channels > 6:
+            t_n_channels = 6
+    return [t_command, t_lvl_audiorfade, t_song, t_channel, t_n_channels]
 
 
 def lvltracks(t_cmd, t_str_lvl):
@@ -163,7 +182,7 @@ def writecolor(t_operation):
         return bcolors.FAIL
 
 
-def player(t_cmd, t_str_fadeout):
+def player(t_cmd, t_str_fadeout, t_track, t_channel):
     """
     esegue il comando sulla traccia
     :t_cmd: comando da eseguire
@@ -171,15 +190,15 @@ def player(t_cmd, t_str_fadeout):
     :return: 0
     """
     if t_cmd == "PLAY":
-        mixer.music.play()
+        mixer.Channel(t_channel).play(mixer.Sound(t_track))
     elif t_cmd == "PAUS":
-        mixer.music.pause()
+        mixer.Channel(t_channel).pause()
     elif t_cmd == "UNPA":
-        mixer.music.unpause()
+        mixer.Channel(t_channel).unpause()
     elif t_cmd == "STOP":
-        mixer.music.stop()
+        mixer.Channel(t_channel).stop()
     elif t_cmd == "FOUT":
-        mixer.music.fadeout(int(t_str_fadeout))
+        mixer.Channel(t_channel).fadeout(int(t_str_fadeout))
     return 0
 
 
@@ -233,30 +252,33 @@ def main():
     command = read_fin[0]
     lvl_audiorfade = read_fin[1]
     song = read_fin[2]
+    channel = read_fin[3]
+    n_channels = read_fin[4]
 
     songlist_print = []
     for i in range(0, len(command)):
         color = writecolor(command[i])
         songlist_print.append(f"""{color}{command[i]} {song[i]}{bcolors.ENDC}""")
-    
+
+    mixer.pre_init(channels = n_channels)
     mixer.init()
     i = 0
     grafica = grafic(line_limit, line_margin, songlist_print, cls_opsys, 0, 0, "")
     while i < len(command):
-        fadeout = "0"
+        audiorfade = "0"
         event = keyboard.read_event()
         if event.event_type == keyboard.KEY_DOWN and event.name == "space":
             if command[i] == "PLAY":
-                mixer.music.load(path_songs + str(song[i]))
+                track = path_songs + song[i]
                 if lvl_audiorfade != []:
-                    mixer.music.set_volume(lvl_audiorfade[i])
-                player(command[i], fadeout)
+                    mixer.Channel(int(channel[i])).set_volume(lvl_audiorfade[i])
+                player(command[i], audiorfade, track, int(channel[i]))
             else:
                 if command[i] == "UNPA" and lvl_audiorfade != [] and lvl_audiorfade[i] != "":
-                    mixer.music.set_volume(lvl_audiorfade[i])
+                    mixer.Channel(int(channel[i])).set_volume(lvl_audiorfade[i])
                 if command[i] == "FOUT" and lvl_audiorfade != [] and lvl_audiorfade[i] != "":
-                    fadeout = lvl_audiorfade[i]
-                player(command[i], fadeout)
+                    audiorfade = lvl_audiorfade[i]
+                player(command[i], audiorfade, track, int(channel[i]))
 
             if i != len(command)-1:
                 grafica = grafic(line_limit, line_margin, songlist_print, cls_opsys, grafica[0], grafica[1], "+1")

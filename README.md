@@ -81,6 +81,28 @@ Se non vengono impostati, il valore di default è 10
 #### Fade-out
 Il secondo argomento per FOUT funge da fade-out in millisecondi
 
+### Quattro argomenti
+Il file può contenere quattro argomenti, ad esempio:
+
+    PLAY,01,,"Track 1.mp3"
+    PAUS,,,"Track 1.mp3"
+    UNPA,10,,"Track 1.mp3"
+    STOP,,,"Track 1.mp3"
+    PLAY,,1,Track_4.mp3
+    PLAY,,,"Track 1.mp3"
+    FOUT,2000,,"Track 1.mp3"
+    PLAY,,,Track_2.mp3
+    PLAY,,,Track_3.mp3
+    FOUT,50,,Track_3.mp3
+    FOUT,,1,Track_4.mp3
+    STOP,,,Track_3.mp3
+
+Il terzo argomento funge da canale (da `0` a `5`), in questo modo si possono controllare più tracce conemporaneamente ma su canali diversi
+
+Se non viene impostato un valore il canale è `0`
+
+Se si vogliono utilizzare i canali bisogna usare quattro argomenti, il secondo se non necessario può tranquillamente rimanere vuoto
+
 ## Problems/Bugs
 Se si riscontrano problemi con la libreria pygame probabilmente bisogna aggiornarla con il comando: `pip install --upgrade pygame`
 
