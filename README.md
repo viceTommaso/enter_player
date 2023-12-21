@@ -41,37 +41,39 @@ Come inizio viene impostato il comando della traccia con:
 
 `UNPA` Continua la riproduzione dopo essere stata messa in pausas
 
-`FOUT` Ferma la traccia con fade-out **UTILIZZABILE CON TRE ARGOMENTI NEL CSV** (valore in ms)
+`FOUTÙ Ferma la traccia con fade-out **UTILIZZABILE CON TRE ARGOMENTI NEL CSV** (valore in ms)
 
 Sucessivamente **SEPARATO CON ","** inserire il nome del file da riprodurre con estensione compresa
 
-Se il file presenta spazi, mettere il nome tra apici: **" "**
+Se il file presenta spazi, mettere il nome tra apici: **"no me.mp3"**
+
+ESCLUSO PER IL `PLAY` non è necessario ripetere il nome della traccia per gli altri comandi, è sufficiente lasciare il campo vuoto o per comodità aggiungere un commento
 
 **Come ultima traccia mettere sempre lo STOP della traccia che conclude il file**
 
 IL FILE DOVRÀ ESSERE SIMILE A QUESTO:
 
     PLAY,"Track 1.mp3"
-    PAUS,"Track 1.mp3"
-    UNPA,"Track 1.mp3"
-    STOP,"Track 1.mp3"
+    PAUS,
+    UNPA,"unpause traccia precedente"
+    STOP,
     PLAY,Track_2.mp3
     PLAY,Track_3.mp3
-    STOP,Track_3.mp3
+    STOP,
 
 ### Tre argomenti
 Il file può contenere tre argomenti, ad esempio:
 
     PLAY,01,"Track 1.mp3"
-    PAUS,,"Track 1.mp3"
-    UNPA,10,"Track 1.mp3"
-    STOP,,"Track 1.mp3"
+    PAUS,,
+    UNPA,10,"unpause traccia precedente con volume più alto"
+    STOP,,
     PLAY,,"Track 1.mp3"
-    FOUT,2000,"Track 1.mp3"
+    FOUT,2000,
     PLAY,,Track_2.mp3
     PLAY,,Track_3.mp3
-    FOUT,50,Track_3.mp3
-    STOP,,Track_3.mp3
+    FOUT,50,
+    STOP,,
 
 #### Volume
 Il secondo argomento per PLAY e UNPA funge da regolatore di volume da 1 a 10 (i numeri singoli possono essere preceduti dallo zero ma è ininfuente: 01 o 1).
@@ -85,17 +87,17 @@ Il secondo argomento per FOUT funge da fade-out in millisecondi
 Il file può contenere quattro argomenti, ad esempio:
 
     PLAY,01,,"Track 1.mp3"
-    PAUS,,,"Track 1.mp3"
-    UNPA,10,,"Track 1.mp3"
-    STOP,,,"Track 1.mp3"
+    PAUS,,,
+    UNPA,10,,
+    STOP,,,
     PLAY,,1,Track_4.mp3
     PLAY,,,"Track 1.mp3"
-    FOUT,2000,,"Track 1.mp3"
+    FOUT,2000,,
     PLAY,,,Track_2.mp3
     PLAY,,,Track_3.mp3
-    FOUT,50,,Track_3.mp3
-    FOUT,,1,Track_4.mp3
-    STOP,,,Track_3.mp3
+    FOUT,50,,
+    FOUT,,1,"Fade out canale 1"
+    STOP,,,
 
 Il terzo argomento funge da canale (da `0` a `5`), in questo modo si possono controllare più tracce conemporaneamente ma su canali diversi
 
@@ -115,6 +117,10 @@ Se si naviga nella playlist è bene non posizionarsi su tracce al di fuori del "
 Il file input essendo .csv non è variabile in argomenti, dunque non variare il numero di `,` per riga
 
 Usare soltando `,` per separare gli argomenti nel flie di input
+
+Per evitare eventuali lag, i nomi dei file audio devono essere puliti da `.` (al di fuori di quello prima dell'estensione), e da spazi
+
+**SE POSSIBILE AVVIARE TUTTE LE TRACCE SEQUENZIALMENTE (TENENDO PREMUTO `spazio`) PER FARE IN MODO CHE IL COMPUTER LEGGA PIÙ VELOCEMENTE LE TRACCE ALL'OCCORENZA IN UN SECONDO MOMENTO**
 
 Per escludere potenziali bugs, non lasciare linee vuote nel file di input
 

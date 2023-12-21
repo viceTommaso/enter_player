@@ -2,12 +2,13 @@
 # !/usr/bin/env python3
 
 __author__ = "Vicentini Tommaso"
-__version__ = "04.01"
+__version__ = "04.02"
 
 import csv
 import keyboard
 import os
 import platform
+import time
 from pygame import mixer
 
 
@@ -15,6 +16,7 @@ in_songfile = ".\\playlist.csv"
 path_songs = ".\\tracks\\"
 line_limit = 0
 line_margin = 0
+printime = True
 
 if line_limit//2 <= line_margin:
     if line_limit % 2 == 0:
@@ -87,7 +89,8 @@ def os_ril():
 def read_in(t_in_songfile):
     """
     legge il file di input ritonando i vetori del comando, livello_audio, suono
-    :return: [t_command, t_lvl_audiorfade, t_song]
+    :t_in_songfile: file di input
+    :return: [t_command, t_lvl_audiorfade, t_song, t_channel, t_n_channels]
     """
     t_command = []
     t_lvl_audiorfade = []
@@ -187,6 +190,8 @@ def player(t_cmd, t_str_fadeout, t_track, t_channel):
     esegue il comando sulla traccia
     :t_cmd: comando da eseguire
     :t_str_fadeout: valore in ms del fadeout
+    :t_track: path file da riprodurre
+    :t_channel: canale dove riprodurre la traccia
     :return: 0
     """
     if t_cmd == "PLAY":
@@ -202,9 +207,10 @@ def player(t_cmd, t_str_fadeout, t_track, t_channel):
     return 0
 
 
-def grafic(t_line_limit, t_line_margin, t_songlist_print, t_cls_opsys, t_print_pos, t_underline_pos, moveorback):
+def grafic(t_i, t_line_limit, t_line_margin, t_songlist_print, t_cls_opsys, t_print_pos, t_underline_pos, moveorback):
     """
     interfaccia grafica del programma
+    :t_i: INT posizione reale nella playlist
     :t_line_limit: INT righe da visualizzare a video
     :t_line_margin: INT numero di tracce che si vogliono visualizzare prima e dopo della traccia che verrà riprodotta
     :t_songlist_print: VETTORE lista delle canzoni
@@ -220,21 +226,25 @@ def grafic(t_line_limit, t_line_margin, t_songlist_print, t_cls_opsys, t_print_p
         if t_underline_pos != t_line_limit - (1 + t_line_margin):
             t_underline_pos += 1
         else:
-            t_print_pos +=1
+            if len(t_songlist_print) - t_i <= line_margin + 1:
+                t_underline_pos += 1
+            else:
+                t_print_pos += 1
+            
     if moveorback == "-1":
         if t_underline_pos != 0 + t_line_margin:
             t_underline_pos -= 1
         else:
-            t_print_pos -= 1
+            if t_i <= line_margin:
+                t_underline_pos -= 1
+            else:
+                t_print_pos -= 1
     os.system(t_cls_opsys)
     for f in range(0, t_line_limit):
-        try:
-            if t_underline_pos == f:
-                print(str(bcolors.UNDERLINE + t_songlist_print[f + t_print_pos]))
-            else:
-                print(str(t_songlist_print[f + t_print_pos]))
-        except IndexError:
-                pass
+        if t_underline_pos == f:
+            print(str(bcolors.UNDERLINE + t_songlist_print[f + t_print_pos]))
+        else:
+            print(str(t_songlist_print[f + t_print_pos]))
     return [t_print_pos, t_underline_pos]
 
 
@@ -263,7 +273,7 @@ def main():
     mixer.pre_init(channels = n_channels)
     mixer.init()
     i = 0
-    grafica = grafic(line_limit, line_margin, songlist_print, cls_opsys, 0, 0, "")
+    grafica = grafic(i, line_limit, line_margin, songlist_print, cls_opsys, 0, 0, "")
     while i < len(command):
         audiorfade = "0"
         event = keyboard.read_event()
@@ -274,6 +284,7 @@ def main():
                     mixer.Channel(int(channel[i])).set_volume(lvl_audiorfade[i])
                 player(command[i], audiorfade, track, int(channel[i]))
             else:
+                track = ""
                 if command[i] == "UNPA" and lvl_audiorfade != [] and lvl_audiorfade[i] != "":
                     mixer.Channel(int(channel[i])).set_volume(lvl_audiorfade[i])
                 if command[i] == "FOUT" and lvl_audiorfade != [] and lvl_audiorfade[i] != "":
@@ -281,18 +292,21 @@ def main():
                 player(command[i], audiorfade, track, int(channel[i]))
 
             if i != len(command)-1:
-                grafica = grafic(line_limit, line_margin, songlist_print, cls_opsys, grafica[0], grafica[1], "+1")
+                grafica = grafic(i, line_limit, line_margin, songlist_print, cls_opsys, grafica[0], grafica[1], "+1")
+                if command[i] == "PLAY" and printime:
+                    print("\nDurata: ", time.strftime("%H:%M:%S", time.gmtime(mixer.Sound(track).get_length())))
                 i += 1
 
         elif event.event_type == keyboard.KEY_DOWN and event.name == "freccia giù" or event.event_type == keyboard.KEY_DOWN and event.name == "freccia destra":
             if i != len(command)-1:
-                grafica = grafic(line_limit, line_margin, songlist_print, cls_opsys, grafica[0], grafica[1], "+1")
+                grafica = grafic(i, line_limit, line_margin, songlist_print, cls_opsys, grafica[0], grafica[1], "+1")
                 i += 1
 
         elif event.event_type == keyboard.KEY_DOWN and event.name == "freccia su" or event.event_type == keyboard.KEY_DOWN and event.name == "freccia sinistra":
             if i != 0:
-                grafica = grafic(line_limit, line_margin, songlist_print, cls_opsys, grafica[0], grafica[1], "-1")
+                grafica = grafic(i, line_limit, line_margin, songlist_print, cls_opsys, grafica[0], grafica[1], "-1")
                 i -= 1
+        
     return None
 
 
