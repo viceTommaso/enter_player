@@ -19,7 +19,7 @@ Oppure (solo windows) eseguendo il file [setup.bat](\etc\setup.bat).
 ## Program
 Il programma apre in input il file [playlist.csv](\bin\playlist.csv) ed esegue il comando delle tracce audio a seconda del parametro impostato, procede sequenzialmente nella playlist dando `spazio`
 
-Si può navigare nella playlist con le freccette: `sinistra`/`su` per tornare indietro, `destra`/`giù` per andare avanti
+Si può navigare nella playlist con le freccette: `sinistra`/`su` per tornare indietro, `destra`/`giù` per andare avanti, mentre `invio` per interrompere le  tracce di ogni canale
 
 Se la lista dovesse risultare troppo lunga nello schermo, all'interno del programma alla riga 16 e 17 sono presenti due variabili:
 

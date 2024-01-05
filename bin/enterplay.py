@@ -2,7 +2,7 @@
 # !/usr/bin/env python3
 
 __author__ = "Vicentini Tommaso"
-__version__ = "04.02"
+__version__ = "04.03"
 
 import csv
 import keyboard
@@ -96,7 +96,7 @@ def read_in(t_in_songfile):
     t_lvl_audiorfade = []
     t_song = []
     t_channel = []
-    t_n_channels = 1
+    t_n_channels = 0
     
     with open(t_in_songfile, "r", encoding="utf-8") as in_song:
         for i in list(csv.reader(in_song)):
@@ -253,6 +253,13 @@ def main():
     main
     :return: None
     """
+    cmd_play = "space"
+    cmd_next1 = "freccia giù"
+    cmd_next2 = "freccia destra"
+    cmd_prev1 = "freccia su"
+    cmd_prev2 = "freccia sinistra"
+    cmd_stop = "enter"
+
     init_files(in_songfile, "INPUT")
     init_directory(path_songs, "", "TRACKS")
 
@@ -277,7 +284,7 @@ def main():
     while i < len(command):
         audiorfade = "0"
         event = keyboard.read_event()
-        if event.event_type == keyboard.KEY_DOWN and event.name == "space":
+        if event.event_type == keyboard.KEY_DOWN and event.name == cmd_play:
             if command[i] == "PLAY":
                 track = path_songs + song[i]
                 if lvl_audiorfade != []:
@@ -297,16 +304,19 @@ def main():
                     print("\nDurata: ", time.strftime("%H:%M:%S", time.gmtime(mixer.Sound(track).get_length())))
                 i += 1
 
-        elif event.event_type == keyboard.KEY_DOWN and event.name == "freccia giù" or event.event_type == keyboard.KEY_DOWN and event.name == "freccia destra":
+        elif event.event_type == keyboard.KEY_DOWN and event.name == cmd_next1 or event.event_type == keyboard.KEY_DOWN and event.name == cmd_next2:
             if i != len(command)-1:
                 grafica = grafic(i, line_limit, line_margin, songlist_print, cls_opsys, grafica[0], grafica[1], "+1")
                 i += 1
 
-        elif event.event_type == keyboard.KEY_DOWN and event.name == "freccia su" or event.event_type == keyboard.KEY_DOWN and event.name == "freccia sinistra":
+        elif event.event_type == keyboard.KEY_DOWN and event.name == cmd_prev1 or event.event_type == keyboard.KEY_DOWN and event.name == cmd_prev2:
             if i != 0:
                 grafica = grafic(i, line_limit, line_margin, songlist_print, cls_opsys, grafica[0], grafica[1], "-1")
                 i -= 1
-        
+        elif event.event_type == keyboard.KEY_DOWN and event.name == cmd_stop:
+            for f in range(0, n_channels):
+                mixer.Channel(f).stop()
+
     return None
 
 
