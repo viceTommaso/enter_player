@@ -2,27 +2,15 @@
 # !/usr/bin/env python3
 
 __author__ = "Vicentini Tommaso"
-__version__ = "04.03"
+__version__ = "05.01"
 
 import csv
+import json
 import keyboard
 import os
 import platform
 import time
 from pygame import mixer
-
-
-in_songfile = ".\\playlist.csv"
-path_songs = ".\\tracks\\"
-line_limit = 0
-line_margin = 0
-printime = True
-
-if line_limit//2 <= line_margin:
-    if line_limit % 2 == 0:
-        line_margin = (line_limit//2) - 1 
-    else:
-        line_margin = (line_limit//2) 
 
 
 class bcolors:
@@ -48,7 +36,9 @@ def init_files(file_ck, file_name):
         with open(file_ck, "a", encoding="utf-8") as f_link:
             f_link.close()
         print(f"""{file_name} FILE doesn't exist, just created""")
-    return 0
+        return 1
+    else:
+        return 0
 
 
 def init_directory(dir_ck, dir_vsby, dir_name):
@@ -226,7 +216,7 @@ def grafic(t_i, t_line_limit, t_line_margin, t_songlist_print, t_cls_opsys, t_pr
         if t_underline_pos != t_line_limit - (1 + t_line_margin):
             t_underline_pos += 1
         else:
-            if len(t_songlist_print) - t_i <= line_margin + 1:
+            if len(t_songlist_print) - t_i <= t_line_margin + 1:
                 t_underline_pos += 1
             else:
                 t_print_pos += 1
@@ -235,7 +225,7 @@ def grafic(t_i, t_line_limit, t_line_margin, t_songlist_print, t_cls_opsys, t_pr
         if t_underline_pos != 0 + t_line_margin:
             t_underline_pos -= 1
         else:
-            if t_i <= line_margin:
+            if t_i <= t_line_margin:
                 t_underline_pos -= 1
             else:
                 t_print_pos -= 1
@@ -253,15 +243,38 @@ def main():
     main
     :return: None
     """
-    cmd_play = "space"
-    cmd_next1 = "freccia giù"
-    cmd_next2 = "freccia destra"
-    cmd_prev1 = "freccia su"
-    cmd_prev2 = "freccia sinistra"
-    cmd_stop = "enter"
+    f_settings = ".\\settings.json"
+    jsonexist = init_files(f_settings, "JSON")
+    if jsonexist:
+        data = {"in_songfile": ".\\playlist.csv", "path_songs": ".\\tracks\\", "line_limit": 0, "line_margin": 0, "printime": True, "cmd_play": "space", "cmd_next1": "freccia giù", "cmd_next2": "freccia destra", "cmd_prev1": "freccia su", "cmd_prev2": "freccia sinistra", "cmd_stop": "enter"}
+        with open(f_settings, "a", encoding="utf-8") as f_settings:
+            json.dump(data, f_settings, indent=4)
+            f_settings.close()
+    with open(f_settings, "r", encoding="utf-8") as file_json:
+        settings = json.loads(file_json.read())
+        file_json.close()
+    
+    in_songfile = settings["in_songfile"]
+    path_songs = settings["path_songs"]
+    line_limit = settings["line_limit"]
+    line_margin = settings["line_margin"]
+    printime = settings["printime"]
 
-    init_files(in_songfile, "INPUT")
-    init_directory(path_songs, "", "TRACKS")
+    if line_limit//2 <= line_margin:
+        if line_limit % 2 == 0:
+            line_margin = (line_limit//2) - 1 
+        else:
+            line_margin = (line_limit//2)
+
+    cmd_play = settings["cmd_play"]
+    cmd_next1 = settings["cmd_next1"]
+    cmd_next2 = settings["cmd_next2"]
+    cmd_prev1 = settings["cmd_prev1"]
+    cmd_prev2 = settings["cmd_prev2"]
+    cmd_stop = settings["cmd_stop"]
+
+    init_directory(settings["path_songs"], "", "TRACKS")
+    init_files(settings["in_songfile"], "INPUT")
 
     cls_opsys = os_ril()
 

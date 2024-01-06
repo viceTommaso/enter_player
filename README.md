@@ -14,7 +14,7 @@ Per l'installazione della libreria keyboard si procede con il comando da termina
 
 Oppure (solo windows) eseguendo il file [setup.bat](\etc\setup.bat).
 
-**SI CONSIGLIA DI ESEGUIRE IL PROGRAMMA PRIMA DELL'USO** per creare i file e le cartelle necessarie
+**SI CONSIGLIA DI ESEGUIRE IL PROGRAMMA DUE VOLTE PRIMA DELL'USO** per creare i file e le cartelle necessarie
 
 ## Program
 Il programma apre in input il file [playlist.csv](\bin\playlist.csv) ed esegue il comando delle tracce audio a seconda del parametro impostato, procede sequenzialmente nella playlist dando `spazio`
@@ -104,6 +104,27 @@ Il terzo argomento funge da canale (da `0` a `5`), in questo modo si possono con
 Se non viene impostato un valore il canale è `0`
 
 Se si vogliono utilizzare i canali bisogna usare quattro argomenti, il secondo se non necessario può tranquillamente rimanere vuoto
+
+## settings.json
+Impostazioni del programma:
+
+    {
+        "in_songfile": ".\\playlist.csv",   #file input tracce
+        "path_songs": ".\\tracks\\",    #cartella contenente le tracce
+        "line_limit": 0,    #linee che si vogliono visualizzare
+        "line_margin": 0,   #linee che si vogliono visualizzare prima e dopo della traccia corrente
+        "printime": true,   #(True o False) stampa la durata della traccia
+        "cmd_play": "space",    #tasto comando di PLAY
+        "cmd_next1": "freccia giù",    #primo tasto per la navigazione AVANTI nelle tracce
+        "cmd_next2": "freccia destra",  #secondo tasto per la navigazione AVANTI nelle tracce
+        "cmd_prev1": "freccia su",  #primo tasto per la navigazione INDIETRO nelle tracce
+        "cmd_prev2": "freccia sinistra",    #secondo tasto per la navigazione INDIETRO nelle tracce
+        "cmd_stop": "enter" #tasto comando per interrompere la riproduzione di tutti i canali
+    }
+
+Non lasciare vuoti i campi, se ad esempio si vuole un solo tasto per la navigazione AVANTI, duplicare lo stesso tasto nel campo per il secondo tasto
+
+Se mancante viene generato in automatico
 
 ## Problems/Bugs
 Se si riscontrano problemi con la libreria pygame probabilmente bisogna aggiornarla con il comando: `pip install --upgrade pygame`
