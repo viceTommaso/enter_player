@@ -2,7 +2,7 @@
 # !/usr/bin/env python3
 
 __author__ = "Vicentini Tommaso"
-__version__ = "05.01"
+__version__ = "06.01"
 
 import csv
 import json
@@ -232,9 +232,9 @@ def grafic(t_i, t_line_limit, t_line_margin, t_songlist_print, t_cls_opsys, t_pr
     os.system(t_cls_opsys)
     for f in range(0, t_line_limit):
         if t_underline_pos == f:
-            print(str(bcolors.UNDERLINE + t_songlist_print[f + t_print_pos]))
+            print(str(bcolors.UNDERLINE + t_songlist_print[f + t_print_pos] + bcolors.ENDC))
         else:
-            print(str(t_songlist_print[f + t_print_pos]))
+            print(str(t_songlist_print[f + t_print_pos] + bcolors.ENDC))
     return [t_print_pos, t_underline_pos]
 
 
@@ -246,7 +246,7 @@ def main():
     f_settings = ".\\settings.json"
     jsonexist = init_files(f_settings, "JSON")
     if jsonexist:
-        data = {"in_songfile": ".\\playlist.csv", "path_songs": ".\\tracks\\", "line_limit": 0, "line_margin": 0, "printime": True, "cmd_play": "space", "cmd_next1": "freccia giù", "cmd_next2": "freccia destra", "cmd_prev1": "freccia su", "cmd_prev2": "freccia sinistra", "cmd_stop": "enter"}
+        data = {"in_songfile": ".\\playlist.csv", "path_songs": ".\\tracks\\", "multi_tracks": False, "line_limit": 0, "line_margin": 0, "printime": True, "cmd_play": "space", "cmd_next1": "freccia giù", "cmd_next2": "freccia destra", "cmd_prev1": "freccia su", "cmd_prev2": "freccia sinistra", "cmd_stop": "enter"}
         with open(f_settings, "a", encoding="utf-8") as f_settings:
             json.dump(data, f_settings, indent=4)
             f_settings.close()
@@ -256,16 +256,10 @@ def main():
     
     in_songfile = settings["in_songfile"]
     path_songs = settings["path_songs"]
+    multi_tracks = settings["multi_tracks"]
     line_limit = settings["line_limit"]
     line_margin = settings["line_margin"]
     printime = settings["printime"]
-
-    if line_limit//2 <= line_margin:
-        if line_limit % 2 == 0:
-            line_margin = (line_limit//2) - 1 
-        else:
-            line_margin = (line_limit//2)
-
     cmd_play = settings["cmd_play"]
     cmd_next1 = settings["cmd_next1"]
     cmd_next2 = settings["cmd_next2"]
@@ -273,10 +267,46 @@ def main():
     cmd_prev2 = settings["cmd_prev2"]
     cmd_stop = settings["cmd_stop"]
 
-    init_directory(settings["path_songs"], "", "TRACKS")
-    init_files(settings["in_songfile"], "INPUT")
-
     cls_opsys = os_ril()
+
+    if multi_tracks:
+        init_directory(settings["path_songs"], "", "TRACKS")
+        init_directory(settings["in_songfile"], "", "INPUT")
+        name_event = []
+        for root, dirs, files in os.walk(in_songfile):
+            for i in files:
+                name_event.append((i.split("."))[0])
+        
+            if line_limit > len(name_event):
+                line_limit = len(name_event)
+            if line_limit//2 <= line_margin:
+                if line_limit % 2 == 0:
+                    line_margin = (line_limit//2) - 1 
+                else:
+                    line_margin = (line_limit//2)
+        f = 0
+        grafica = grafic(f, line_limit, line_margin, name_event, cls_opsys, 0, 0, "")
+        while f < len(name_event):
+            event = keyboard.read_event()
+            if event.event_type == keyboard.KEY_DOWN and event.name == cmd_play:
+                in_songfile = in_songfile + "\\" + name_event[f] + ".csv"
+                path_songs = path_songs + "\\" + name_event[f] + "\\"
+                event = 0
+                break
+            elif event.event_type == keyboard.KEY_DOWN and event.name == cmd_next1 or event.event_type == keyboard.KEY_DOWN and event.name == cmd_next2:
+                if f != len(name_event)-1:
+                    grafica = grafic(f, line_limit, line_margin, name_event, cls_opsys, grafica[0], grafica[1], "+1")
+                    f += 1
+            elif event.event_type == keyboard.KEY_DOWN and event.name == cmd_prev1 or event.event_type == keyboard.KEY_DOWN and event.name == cmd_prev2:
+                if f != 0:
+                    grafica = grafic(f, line_limit, line_margin, name_event, cls_opsys, grafica[0], grafica[1], "-1")
+                    f -= 1
+    else:
+        init_directory(settings["path_songs"], "", "TRACKS")
+        init_files(settings["in_songfile"], "INPUT")
+
+    line_limit = settings["line_limit"]
+    line_margin = settings["line_margin"]
 
     read_fin = read_in(in_songfile)
     command = read_fin[0]
@@ -285,14 +315,23 @@ def main():
     channel = read_fin[3]
     n_channels = read_fin[4]
 
+    if line_limit > len(command):
+        line_limit = len(command)
+    if line_limit//2 <= line_margin:
+        if line_limit % 2 == 0:
+            line_margin = (line_limit//2) - 1 
+        else:
+            line_margin = (line_limit//2)
+
     songlist_print = []
     for i in range(0, len(command)):
         color = writecolor(command[i])
-        songlist_print.append(f"""{color}{command[i]} {song[i]}{bcolors.ENDC}""")
+        songlist_print.append(f"""{color}{command[i]} {song[i]}""")
 
     mixer.pre_init(channels = n_channels)
     mixer.init()
     i = 0
+    
     grafica = grafic(i, line_limit, line_margin, songlist_print, cls_opsys, 0, 0, "")
     while i < len(command):
         audiorfade = "0"
